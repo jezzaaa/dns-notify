@@ -1,0 +1,130 @@
+.TH DNS_NOTIFY 1 "2026-02-26" "1.0" "User Commands"
+.SH NAME
+dns_notify \- send a DNS NOTIFY message to a nameserver
+.SH SYNOPSIS
+.B dns_notify.py
+[\fB\-h\fR]
+[\fB\-p\fR \fIPORT\fR]
+[\fB\-t\fR \fISECS\fR]
+[\fB\-\-tcp\fR]
+\fIzone\fR \fIserver\fR
+.SH DESCRIPTION
+.B dns_notify
+sends a DNS NOTIFY message (RFC\ 1996) to the specified nameserver, requesting
+that it check whether the given zone has been updated and initiate a zone
+transfer if so.
+.PP
+The NOTIFY message is a standard DNS query with opcode NOTIFY\ (4) and the
+AA\ (Authoritative\ Answer) flag set, carrying a single question record for
+the zone with type SOA.
+.PP
+The target server may be specified as a hostname, a short (unqualified) name,
+or an IPv4/IPv6 address. Hostnames are resolved via the system resolver before
+the message is sent.
+.SH ARGUMENTS
+.TP
+.I zone
+The DNS zone name to notify (e.g.\&
+.BR example.com ).
+.TP
+.I server
+The target nameserver, given as a hostname or IP address.
+.SH OPTIONS
+.TP
+.BR \-p \ \fIPORT\fR ", " \-\-port \ \fIPORT\fR
+Destination port. Default:
+.BR 53 .
+.TP
+.BR \-t \ \fISECS\fR ", " \-\-timeout \ \fISECS\fR
+Seconds to wait for a response before giving up. Default:
+.BR 5.0 .
+.TP
+.B \-\-tcp
+Send the NOTIFY message over TCP instead of UDP.
+.TP
+.BR \-h ", " \-\-help
+Print a usage summary and exit.
+.SH EXAMPLES
+Send a NOTIFY for
+.I example.com
+to a nameserver by hostname:
+.PP
+.RS
+.EX
+dns_notify.py example.com ns1.example.com
+.EE
+.RE
+.PP
+Send a NOTIFY using an IP address:
+.PP
+.RS
+.EX
+dns_notify.py example.com 192.0.2.53
+.EE
+.RE
+.PP
+Use a non-standard port:
+.PP
+.RS
+.EX
+dns_notify.py example.com ns1.example.com \-p 5353
+.EE
+.RE
+.PP
+Use TCP transport with a 2-second timeout:
+.PP
+.RS
+.EX
+dns_notify.py example.com ns1.example.com \-\-tcp \-t 2
+.EE
+.RE
+.SH DIAGNOSTICS
+On success the resolved server address, port, and response rcode are printed to
+standard output.
+.PP
+.B NOERROR
+.RS
+The server acknowledged the NOTIFY.
+.RE
+.PP
+.B NOTAUTH
+.RS
+The server is not authoritative for the zone.
+.RE
+.PP
+.B NOTIMP
+.RS
+The server does not implement the NOTIFY opcode.
+.RE
+.PP
+.B REFUSED
+.RS
+The server refused the NOTIFY request.
+.RE
+.PP
+Errors (hostname resolution failure, network timeout, connection refused) are
+reported on standard error and the script exits with status\ 1.
+.SH EXIT STATUS
+.TP
+.B 0
+NOTIFY sent and a response was received.
+.TP
+.B 1
+An error occurred.
+.SH DEPENDENCIES
+Requires Python\ 3.7 or later and the
+.B dnspython
+library (https://www.dnspython.org/). Install with:
+.PP
+.RS
+.EX
+pip install dnspython
+.EE
+.RE
+.SH SEE ALSO
+.BR dig (1),
+.BR named (8)
+.PP
+RFC\ 1996 \(em A Mechanism for Prompt Notification of Zone Changes (DNS NOTIFY)
+.SH STANDARDS
+RFC\ 1996
